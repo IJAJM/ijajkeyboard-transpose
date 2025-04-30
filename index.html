@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transpose Chord Otomatis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6 flex flex-col items-center justify-between">
+
+  <div class="w-full max-w-3xl bg-gray-800 p-6 rounded-2xl shadow-xl">
+    <h1 class="text-2xl font-bold text-cyan-400 text-center mb-4">Aplikasi Transpose Chord Otomatis</h1>
+
+    <!-- Input lirik + chord -->
+    <label class="block mb-2 text-sm font-medium">Masukkan lirik dengan chord:</label>
+    <textarea id="lyricsInput" rows="7" placeholder="C        G        Am\nKu tatap langit biru...\nF        C        G\nDi antara awan putih..."
+      class="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 mb-4 font-mono"></textarea>
+
+    <!-- Transpose control -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-4 items-center">
+      <div>
+        <label for="steps" class="block text-sm font-medium">Jumlah langkah:</label>
+        <input type="number" id="steps" value="1" min="1" max="12"
+          class="w-20 bg-gray-700 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+      </div>
+      <div class="flex gap-3">
+        <button onclick="transposeFull(-1)" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold">
+          Transpose Turun
+        </button>
+        <button onclick="transposeFull(1)" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold">
+          Transpose Naik
+        </button>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <h2 class="text-lg font-semibold text-cyan-300 mb-2">Hasil Transpose:</h2>
+    <pre id="output" class="bg-gray-700 p-4 rounded-lg min-h-[120px] whitespace-pre-wrap font-mono"></pre>
+  </div>
+
+  <!-- Footer Copyright -->
+  <footer class="text-sm text-gray-500 mt-6 text-center">
+    © 2025 ijajkeyboard 🎹 — All rights reserved.
+  </footer>
+
+  <script>
+    const chords = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const flatMap = {'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};
+    const chordRegex = /\b([A-G](#|b)?(m|maj|min|dim|aug|sus[24]?|7|9|13)?(\/[A-G](#|b)?)?)\b/g;
+
+    function normalizeChord(chord) {
+      if (flatMap[chord]) return flatMap[chord];
+      return chord;
+    }
+
+    function transposeChord(chord, steps) {
+      let match = chord.match(/^([A-G](#|b)?)(.*)/);
+      if (!match) return chord;
+
+      let root = normalizeChord(match[1]);
+      let suffix = match[3] || '';
+      let index = chords.indexOf(root);
+      if (index === -1) return chord;
+
+      let newIndex = (index + steps + 12) % 12;
+      return chords[newIndex] + suffix;
+    }
+
+    function transposeFull(direction) {
+      let stepCount = parseInt(document.getElementById("steps").value) || 1;
+      let step = direction * stepCount;
+
+      let text = document.getElementById("lyricsInput").value;
+      let transposedText = text.replace(chordRegex, (match) => transposeChord(match, step));
+      document.getElementById("output").textContent = transposedText;
+    }
+  </script>
+</body>
+</html>
